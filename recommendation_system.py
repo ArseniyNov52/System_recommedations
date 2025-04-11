@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-similarity_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+similarity_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
 
 def log_call(func):
@@ -114,20 +114,26 @@ def format_books(book_list):
     if not book_list:
         return "К сожалению, не удалось найти подходящих рекомендаций 😔"
 
-    formatted_books = ["✨ 📚 *Рекомендуемые книги* 📚 ✨\n"]
+    formatted_books = ["✨ 📚 *Рекомендуемые книги* 📚 ✨",'\n\n']
 
     for i, book in enumerate(book_list, 1):
         title = book.get("name", "Без названия")
         authors = book.get("author", "Без автора").replace("By ", "").strip()
         description = book.get("description", "Описание отсутствует")
 
-        short_description = (description[:250] + '...') if len(description) > 250 else description
+        if len(description) > 250:
+            last_space = description[:250].rfind(' ')
+            short_description = description[:last_space] + '...' if last_space > 0 else description[:247] + '...'
+        else:
+            short_description = description
 
-        formatted_books.append(
-            f"🔹 *{title}*\n"
-            f"👤 *Автор:* {authors}\n"
-            f"📜 *Описание:* {short_description}\n"
-        )
+        entry = [
+            f"🔹 *{title}*",
+            f"👤 *Автор:* {authors}",
+            f"📜 *Описание:* {short_description}"
+        ]
+
+        formatted_books.append("\n".join(entry))
 
         if i < len(book_list):
             formatted_books.append("\n――――――――――――――――――――――\n")
@@ -161,6 +167,7 @@ def compute_similarity(target_text: str, books_dataset: pd.DataFrame, top_n: int
 
         result_df = books_dataset.copy()
         result_df["similarity"] = similarities
+        print(result_df)
 
         return result_df.nlargest(top_n, "similarity")
 
