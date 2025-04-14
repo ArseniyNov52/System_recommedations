@@ -1,7 +1,6 @@
 import requests
 import csv
 import time
-import hashlib
 import sys
 from datetime import datetime
 import re
